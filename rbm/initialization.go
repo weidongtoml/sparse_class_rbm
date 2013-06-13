@@ -5,24 +5,24 @@ import (
 	"math/rand"
 )
 
-/**
- * Initialize a SparseClassRBM
- *
- * @see Ref. [1], 8. The initial values of the weights and bias.
- *     "The weigths are typically initialized to small random values chosen from
- *	a zero-mean Gaussian with a standard deviation of about 0.01..."
- *     "...initialize the bias of visible unit i to log[p_i/(1-p_i)] where p_i
- *  is the proportion of training vectors in which unit i is on..."
- *     "...using a sparsity target probability of t (see section 11), it makes
- *  sense to initialize the hidden biases to be log[t/(1-t)]. Otherwise, initial
- *  hidden biases of 0 are usually fine. It is also possible to start the hidden
- *  units with quite large negative biases of about -4 as a crude way of 
- *  encouraging sparsity..." 
- */
+// Initialize a SparseClassRBM
+//  feature_classes: an array specifying the number features in each feature class
+//  member_biases: bias for every features in every class
+//  param num_hidden_units: number of hidden units for this RBM
+//  param positive_y_bias: initial bias for the case y = 1.
+//
+// Ref. [1], 8. The initial values of the weights and bias.
+//  "The weigths are typically initialized to small random values chosen from
+// a zero-mean Gaussian with a standard deviation of about 0.01..."
+//  "...initialize the bias of visible unit i to log[p_i/(1-p_i)] where p_i
+// is the proportion of training vectors in which unit i is on..."
+//  "...using a sparsity target probability of t (see section 11), it makes
+// sense to initialize the hidden biases to be log[t/(1-t)]. Otherwise, initial
+// hidden biases of 0 are usually fine. It is also possible to start the hidden
+// units with quite large negative biases of about -4 as a crude way of
+// encouraging sparsity..." 
 func (rbm *SparseClassRBM) Initialize(feature_classes []uint32,
-	member_biases [][]float32,
-	num_hidden_units uint32,
-	positive_y_bias float32) {
+	member_biases [][]float32, num_hidden_units uint32, positive_y_bias float32) {
 	rbm.x_class_num = uint32(len(feature_classes))
 	rbm.h_num = num_hidden_units
 
