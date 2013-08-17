@@ -1,3 +1,7 @@
+// Copyright 2013 Weidong Liang. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package rbm
 
 import (
@@ -71,11 +75,11 @@ func Test_Initialize(t *testing.T) {
 		t.Errorf("Expected len(len(rbm.u)) to be %d but got %d\n",
 			number_hidden_units, len(rbm.u))
 	}
-	
+
 	//test for d
 	if rbm.d != positive_y_bias {
 		t.Errorf("Expected rbm.d to be %f, but got %f\n",
 			positive_y_bias, rbm.d)
 	}
-	
+
 }

@@ -1,3 +1,7 @@
+// Copyright 2013 Weidong Liang. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package rbm
 
 import (
@@ -9,7 +13,7 @@ import (
 func (rbm *SparseClassRBM) GetPrediction(instance *DataInstance) float32 {
 	energy_y_1 := float64(rbm.d)
 	energy_y_0 := float64(0.0)
-	
+
 	for h, c_val := range rbm.c {
 		sum_of_x_weights := float64(c_val)
 		for x_class, x_value := range instance.x {
@@ -18,7 +22,7 @@ func (rbm *SparseClassRBM) GetPrediction(instance *DataInstance) float32 {
 		energy_y_1 += float64(softplus(sum_of_x_weights + float64(rbm.u[h])))
 		energy_y_0 += float64(softplus(sum_of_x_weights))
 	}
-	
+
 	return float32(math.Exp(energy_y_1) / (math.Exp(energy_y_1) + math.Exp(energy_y_0)))
 }
 

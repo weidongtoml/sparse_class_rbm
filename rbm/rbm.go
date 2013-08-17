@@ -1,6 +1,8 @@
-// Copyright Weidoliang (2013)
+// Copyright 2013 Weidong Liang. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-// Package rbm provides and implementation of the SparseClassRBM for 
+// Package rbm provides and implementation of the SparseClassRBM for
 // classification/regression.
 //
 // SparseClassRBM:
@@ -8,7 +10,7 @@
 //  p(y, X, h) = exp(-E(y,X,h))/Z
 //
 // Reference:
-//  [1]. Hinton, 2010, A Practical Guide to Training Restricted Boltzmann Machines (Ver. 1) 
+//  [1]. Hinton, 2010, A Practical Guide to Training Restricted Boltzmann Machines (Ver. 1)
 //
 // TODO:
 //  Initialization of random seed.
@@ -16,22 +18,32 @@
 //
 package rbm
 
+import (
+	_ "fmt"
+	_ "math"
+	"math/rand"
+	"time"
+)
+
+type WeightT float64
+
 // RBM Object for storing the parameters of a gven SparseClassRBM
 type SparseClassRBM struct {
-	w           [][][]float32 //interactions between X and h [feature_class, hidden, visible]
-	b           [][]float32   //bias of X
-	c           []float32     //bias of h
-	u           []float32     //interactions between y and h
-	d           float32       //bias of y
-	x_class_num uint32        //number of Classes in X
-	h_num       uint32        //number of hidden units
+	w             [][][]WeightT //interactions between X and h [feature_class, hidden, visible]
+	b             [][]WeightT   //bias of X
+	c             []WeightT     //bias of h
+	u             []WeightT     //interactions between y and h
+	d             WeightT       //bias of y
+	x_class_num   int           //number of Classes in X
+	x_class_sizes []int         //Size of each classes
+	h_num         int           //number of hidden units
 }
 
 // DataInstance is used for storing data sample for training and prediction.
 // In the case of prediction, the value of y is ignored.
 type DataInstance struct {
-	x []uint32 //values of each classes, in the order of Class0, Class1, ...
-	y float32  //values of Y
+	x []int //values of each classes, in the order of Class0, Class1, ...
+	y int   //values of Y
 }
 
 type DataInstanceAccessor interface {
@@ -48,12 +60,12 @@ type trainParameters struct {
 }
 
 type RBMTrainer struct {
-	rbm                      *SparseClassRBM       //RBM model
-	parameters               trainParameters       //Training parameters
+	rbm                      *SparseClassRBM      //RBM model
+	parameters               trainParameters      //Training parameters
 	training_data_accessor   DataInstanceAccessor //Training data
 	validation_data_accessor DataInstanceAccessor //Test data
 }
 
 func init() {
-	//TODO(weidoliang): add random seed initialization
+	rand.Seed(time.Now().Unix())
 }
