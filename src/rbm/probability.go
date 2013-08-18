@@ -4,10 +4,6 @@
 
 package rbm
 
-import (
-	_ "math"
-)
-
 // Method probDistOfHGivenXY calculates the probability distribution of
 // p(h = [1]| X, Y) and store the result in h.
 func (rbm *SparseClassRBM) probDistOfHGivenXY(h []WeightT, x []int, y int) {
@@ -23,7 +19,7 @@ func (rbm *SparseClassRBM) probOfHGivenXY(j int, x []int, y int) WeightT {
 	return Sigmoid(s)
 }
 
-// Method probOfXInClassCGivenH calculates the probability of P(X_c | h)
+// Method probOfXInClassCGivenH calculates the probability of P(X_c | h).
 //	E(X_c = k, H) = exp(sum{0 <= j <= |H}(W[c][j][k] * H[j]))
 //	P(X_c = k | H) = E(X_c = k, H) / ( sum{0 <= q < |X_c|}(E(X_c = q, H) )
 func (rbm *SparseClassRBM) probOfXInClassCGivenH(c int, h []WeightT) []WeightT {
@@ -43,7 +39,7 @@ func (rbm *SparseClassRBM) probOfXInClassCGivenH(c int, h []WeightT) []WeightT {
 	return p
 }
 
-// Method probOfYGivenX calculates the probability of P(Y=1 | X)
+// Method probOfYGivenX calculates the probability of P(Y=1 | X).
 //	P(Y=1|X) = exp{d + sum{0<=j<|H|}(sotfplus( w[j].X + c[j] + u[j] )) } /
 //		( exp{ d + sum{0<=j<|H|}(sotfplus( w[j].X + c[j] + u[j] )) } +
 //			 exp{ sum{0<=j<|H|}(sotfplus( w[j].X + c[j] )) } )

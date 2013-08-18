@@ -13,7 +13,6 @@
 //  [1]. Hinton, 2010, A Practical Guide to Training Restricted Boltzmann Machines (Ver. 1)
 //
 // TODO:
-//  Initialization of random seed.
 //  One visible bias per feature class VS one visible bias per visible units
 //
 package rbm
