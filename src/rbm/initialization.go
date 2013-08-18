@@ -43,6 +43,8 @@ func (rbm *SparseClassRBM) CloneEmpty() *SparseClassRBM {
 func (rbm *SparseClassRBM) Initialize(feature_classes []int,
 	member_biases [][]WeightT, num_hidden_units int, positive_y_bias WeightT) {
 	rbm.x_class_num = len(feature_classes)
+	rbm.x_class_sizes = make([]int, len(feature_classes))
+	copy(rbm.x_class_sizes, feature_classes)
 	rbm.h_num = num_hidden_units
 
 	if num_hidden_units < 1 {

@@ -31,6 +31,12 @@ func Test_Initialize(t *testing.T) {
 			num_classes, rbm.x_class_num)
 	}
 
+	for i, s := range feature_classes {
+		if rbm.ClassSize(i) != s {
+			t.Errorf("Expected class %d has size %d, but got %d.", i, s, rbm.ClassSize(i))
+		}
+	}
+
 	//test for the dimenions of W
 	if len(rbm.w) != num_classes {
 		t.Errorf("Expected len(W) to be %d but got %d\n", num_classes, len(rbm.w))

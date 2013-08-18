@@ -7,8 +7,8 @@ package rbm
 // Method probDistOfHGivenXY calculates the probability distribution of
 // p(h = [1]| X, Y) and store the result in h.
 func (rbm *SparseClassRBM) probDistOfHGivenXY(h []WeightT, x []int, y int) {
-	for i := range h {
-		h[i] = rbm.probOfHGivenXY(i, x, y)
+	for j := range h {
+		h[j] = rbm.probOfHGivenXY(j, x, y)
 	}
 }
 

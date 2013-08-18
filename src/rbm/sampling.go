@@ -5,10 +5,10 @@
 package rbm
 
 import (
-	_ "math"
 	"math/rand"
 )
 
+// Method sampleHGivenXY samples H according to the p.d. P(H|X, Y).
 func (rbm *SparseClassRBM) sampleHGivenXY(h []WeightT, x []int, y int) {
 	for i := range h {
 		p := rbm.probOfHGivenXY(i, x, y)
@@ -20,7 +20,7 @@ func (rbm *SparseClassRBM) sampleHGivenXY(h []WeightT, x []int, y int) {
 	}
 }
 
-// Sample X ` P(X|h)
+// Method sampleXGivenH sample X according to the p.d. P(X|h).
 func (rbm *SparseClassRBM) sampleXGivenH(x []int, h []WeightT) {
 	for c := 0; c < rbm.x_class_num; c++ {
 		p_dist := rbm.probOfXInClassCGivenH(c, h)
@@ -28,6 +28,7 @@ func (rbm *SparseClassRBM) sampleXGivenH(x []int, h []WeightT) {
 	}
 }
 
+// Method sampleYGivenH samples Y according to the p.d. P(Y|H)
 func (rbm *SparseClassRBM) sampleYGivenH(y *int, h []WeightT) {
 	if RandomWeight() < Sigmoid(rbm.d+DotProduct(rbm.u, h)) {
 		*y = 1
@@ -36,13 +37,17 @@ func (rbm *SparseClassRBM) sampleYGivenH(y *int, h []WeightT) {
 	}
 }
 
+// Method SampleKFromDistribution selects a sample from the multinomial distribution p_dist.
 func SampleKFromDistribution(p_dist []WeightT) int {
-	p := RandomWeight()
+	return SelectKFromDist(RandomWeight(), p_dist)
+}
+
+func SelectKFromDist(p WeightT, p_dist []WeightT) int {
 	k := 0
 	acc_prob := p_dist[0]
-	for ; k < len(p_dist); k++ {
+	for ; k < len(p_dist)-1; k++ {
 		if p > acc_prob {
-			acc_prob += p_dist[k]
+			acc_prob += p_dist[k+1]
 		} else {
 			break
 		}

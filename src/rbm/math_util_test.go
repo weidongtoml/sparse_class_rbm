@@ -6,15 +6,8 @@ package rbm
 
 import (
 	_ "fmt"
-	"math"
 	"testing"
 )
-
-func EqualWithinPrecision(a, b WeightT, p float64) bool {
-	return math.Abs(float64(a-b)) <= p
-}
-
-const kPrecision = 0.000001
 
 func Test_Sigmoid(t *testing.T) {
 	test_cases := []struct {
