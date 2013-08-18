@@ -9,6 +9,21 @@ import (
 	"math/rand"
 )
 
+func (rbm *SparseClassRBM) CloneEmpty() *SparseClassRBM {
+	var empty_rbm SparseClassRBM
+	empty_rbm.w = make([][][]WeightT, rbm.x_class_num)
+	for c, k := range rbm.x_class_sizes {
+		empty_rbm.w[c] = make([][]WeightT, k)
+		for h, _ := range empty_rbm.w[c] {
+			empty_rbm.w[c][h] = make([]WeightT, rbm.h_num)
+		}
+	}
+	empty_rbm.b = make([][]WeightT, rbm.x_class_num)
+	empty_rbm.c = make([]WeightT, rbm.h_num)
+	empty_rbm.u = make([]WeightT, rbm.h_num)
+	return &empty_rbm
+}
+
 // Initialize a SparseClassRBM
 //  feature_classes: an array specifying the number features in each feature class
 //  member_biases: bias for every features in every class

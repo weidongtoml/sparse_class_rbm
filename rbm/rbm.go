@@ -52,15 +52,16 @@ type DataInstanceAccessor interface {
 }
 
 type trainParameters struct {
-	learning_rate        float32 //equivalent to the \theta in the Delta Rule
-	regularization_rate  float32 //equivalent to the \lambda in the Delta Rule
-	momentum_rate        float32 //equivalent to the \mu in the Delta Rule
-	gen_learn_importance float32 //equivalent to the \alpha in the hybrid learning equation
-	gibbs_chain_length   uint32  //the k value of CD-k
+	learning_rate        WeightT //equivalent to the \theta in the Delta Rule
+	regularization_rate  WeightT //equivalent to the \lambda in the Delta Rule
+	momentum_rate        WeightT //equivalent to the \mu in the Delta Rule
+	gen_learn_importance WeightT //equivalent to the \alpha in the hybrid learning equation
+	gibbs_chain_length   int     //the k value of CD-k
 }
 
 type RBMTrainer struct {
 	rbm                      *SparseClassRBM      //RBM model
+	prev_delta               *SparseClassRBM      //For storing previous Delta
 	parameters               trainParameters      //Training parameters
 	training_data_accessor   DataInstanceAccessor //Training data
 	validation_data_accessor DataInstanceAccessor //Test data
