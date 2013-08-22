@@ -11,16 +11,26 @@ import (
 
 func (rbm *SparseClassRBM) CloneEmpty() *SparseClassRBM {
 	var empty_rbm SparseClassRBM
-	empty_rbm.w = make([][][]WeightT, rbm.x_class_num)
+	empty_rbm.x_class_num = rbm.x_class_num
+	empty_rbm.h_num = rbm.h_num
+	empty_rbm.x_class_sizes = make([]int, rbm.x_class_num)
+	for i, v := range rbm.x_class_sizes {
+		empty_rbm.x_class_sizes[i] = v
+	}
+	empty_rbm.w = make([][][]WeightT, rbm.NumOfVisibleClasses())
 	for c, k := range rbm.x_class_sizes {
-		empty_rbm.w[c] = make([][]WeightT, k)
+		empty_rbm.w[c] = make([][]WeightT, rbm.SizeOfHiddenLayer())
 		for h, _ := range empty_rbm.w[c] {
-			empty_rbm.w[c][h] = make([]WeightT, rbm.h_num)
+			empty_rbm.w[c][h] = make([]WeightT, k)
 		}
 	}
-	empty_rbm.b = make([][]WeightT, rbm.x_class_num)
+	empty_rbm.b = make([][]WeightT, len(rbm.b))
+	for i, _ := range rbm.b {
+		empty_rbm.b[i] = make([]WeightT, len(rbm.b[i]))
+	}
 	empty_rbm.c = make([]WeightT, rbm.h_num)
 	empty_rbm.u = make([]WeightT, rbm.h_num)
+	empty_rbm.d = 0
 	return &empty_rbm
 }
 

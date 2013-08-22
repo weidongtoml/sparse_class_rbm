@@ -45,8 +45,13 @@ func Test_SequentialDataLoader(t *testing.T) {
 		t.Errorf("Failed to create test file: %s:%s.", test_file, err)
 	}
 	loader := NewInstanceLoader(test_file, num_feature_classes)
+	defer func() {
+		loader.Close()
+	}()
+	var i_accessor DataInstanceAccessor
+	i_accessor = loader
 	for i, t_case := range test_cases {
-		instance, err := loader.NextInstance()
+		instance, err := i_accessor.NextInstance()
 		if err != nil {
 			t.Errorf("TestCase: #%d: %s.", i, err)
 		}
@@ -54,14 +59,13 @@ func Test_SequentialDataLoader(t *testing.T) {
 			t.Errorf("TestCase: #%d: Expected %v but got %v.", i, t_case, instance)
 		}
 	}
-	_, err = loader.NextInstance()
+	_, err = i_accessor.NextInstance()
 	if err != io.EOF {
 		t.Errorf("Expected EOF but got %s.", err)
 	}
-	loader.Reset()
-	_, err = loader.NextInstance()
+	i_accessor.Reset()
+	_, err = i_accessor.NextInstance()
 	if err != nil {
 		t.Errorf("Expected instance but got error.")
 	}
-	loader.Close()
 }

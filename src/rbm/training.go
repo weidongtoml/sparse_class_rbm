@@ -4,6 +4,11 @@
 
 package rbm
 
+import (
+	"io"
+	"log"
+)
+
 // Initialize a trainer.
 func (trainer *RBMTrainer) Initialize(rbm *SparseClassRBM,
 	train_data_accessor DataInstanceAccessor,
@@ -62,44 +67,77 @@ func (d *deltaT) ScalarProduct(x int) {
 
 func (rbm *SparseClassRBM) NewDeltaT() *deltaT {
 	var delta deltaT
-	delta.delta_c = make([]WeightT, rbm.h_num)
-	delta.delta_u = make([]WeightT, rbm.h_num)
+	delta.delta_c = make([]WeightT, rbm.SizeOfHiddenLayer())
+	delta.delta_u = make([]WeightT, rbm.SizeOfHiddenLayer())
 	return &delta
 }
 
 func (delta *deltaT) Clear() {
 	(*delta).delta_w = (*delta).delta_w[0:0]
-	(*delta).delta_u = (*delta).delta_u[0:0]
+	(*delta).delta_b = (*delta).delta_b[0:0]
 }
 
 func (trainer *RBMTrainer) Train() {
-
-}
-
-func (trainer *RBMTrainer) doGradient(is_stop_chan chan bool, delta_chan chan *deltaT) {
-	rbm := trainer.rbm
-	pos_delta := rbm.NewDeltaT()
-	neg_delta := rbm.NewDeltaT()
-
+	pos_delta := trainer.rbm.NewDeltaT()
+	neg_delta := trainer.rbm.NewDeltaT()
 	for {
-		if <-is_stop_chan {
-			delta_chan <- nil
-			close(delta_chan)
+		has_pos, has_neg := trainer.doGradient(pos_delta, neg_delta)
+		if has_pos {
+			trainer.updateModel(pos_delta)
+		}
+		if has_neg {
+			trainer.updateModel(neg_delta)
+		}
+		if !has_pos && !has_neg {
+			//TODO(weidoliang): evaluate model result and only when obtain the best
+			//resilt do we stop training.
 			break
 		}
-		data_instance := trainer.training_data_accessor.NextInstance()
-		x := data_instance.x
-		if data_instance.pos_y > 0 {
-			trainer.doInstanceGradient(x, 1, pos_delta)
-			pos_delta.ScalarProduct(data_instance.pos_y)
-			delta_chan <- pos_delta //TODO(weidoliang): multiply by pos_y
-		}
-		if data_instance.neg_y > 0 {
-			trainer.doInstanceGradient(x, 0, neg_delta)
-			pos_delta.ScalarProduct(data_instance.neg_y)
-			delta_chan <- neg_delta //TODO(weidoliang): multiply by pos_y
+	}
+}
+
+func (rbm *SparseClassRBM) IsValidInput(instance DataInstance) bool {
+	if (instance.pos_y < 0 || instance.neg_y < 0) ||
+		(instance.pos_y == 0 && instance.neg_y == 0) {
+		return false
+	}
+	for i := 0; i < rbm.NumOfVisibleClasses(); i++ {
+		if instance.x[i] >= rbm.ClassSize(i) {
+			return false
 		}
 	}
+	return true
+}
+
+func (trainer *RBMTrainer) doGradient(pos_delta, neg_delta *deltaT) (bool, bool) {
+	has_pos, has_neg := false, false
+	var data_instance DataInstance
+	for {
+		instance, err := trainer.training_data_accessor.NextInstance()
+		if err == io.EOF {
+			return has_pos, has_neg
+		}
+		if trainer.rbm.IsValidInput(instance) {
+			data_instance = instance
+			break
+		} else {
+			log.Printf("invalid input: %v.\n", instance)
+		}
+	}
+
+	pos_delta.Clear()
+	neg_delta.Clear()
+	if data_instance.pos_y > 0 {
+		has_pos = true
+		trainer.doInstanceGradient(data_instance.x, 1, pos_delta)
+		pos_delta.ScalarProduct(data_instance.pos_y)
+	}
+	if data_instance.neg_y > 0 {
+		has_neg = true
+		trainer.doInstanceGradient(data_instance.x, 0, neg_delta)
+		pos_delta.ScalarProduct(data_instance.neg_y)
+	}
+	return has_pos, has_neg
 }
 
 func (trainer *RBMTrainer) doInstanceGradient(x []int, y int, delta *deltaT) {
@@ -110,9 +148,9 @@ func (trainer *RBMTrainer) doInstanceGradient(x []int, y int, delta *deltaT) {
 
 	delta.Clear()
 	// CD-k
-	x_hat := make([]int, rbm.x_class_num)
+	x_hat := make([]int, rbm.NumOfVisibleClasses())
 	y_hat := 0
-	h_hat := make([]WeightT, rbm.h_num)
+	h_hat := make([]WeightT, rbm.SizeOfHiddenLayer())
 	if param.gen_learn_importance > 0 {
 		copy(x_hat, x)
 		y_hat = y

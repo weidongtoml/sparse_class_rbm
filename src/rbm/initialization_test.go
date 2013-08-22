@@ -87,4 +87,49 @@ func Test_Initialize(t *testing.T) {
 		t.Errorf("Expected rbm.d to be %f, but got %f\n",
 			positive_y_bias, rbm.d)
 	}
+
+	empty_rbm := rbm.CloneEmpty()
+	if empty_rbm.NumOfVisibleClasses() != rbm.NumOfVisibleClasses() {
+		t.Errorf("Number of visible classes not equal, expected %d, but got %d.",
+			rbm.NumOfVisibleClasses(), empty_rbm.NumOfVisibleClasses())
+	} else {
+		for i := 0; i < rbm.NumOfVisibleClasses(); i++ {
+			if empty_rbm.ClassSize(i) != rbm.ClassSize(i) {
+				t.Errorf("Class %d size not equal, expectd %d but got %d.",
+					i, rbm.ClassSize(i), empty_rbm.ClassSize(i))
+			}
+		}
+	}
+	if empty_rbm.SizeOfHiddenLayer() != rbm.SizeOfHiddenLayer() {
+		t.Errorf("Expected hiddeny layer size to be %d but got %d.",
+			rbm.SizeOfHiddenLayer(), empty_rbm.SizeOfHiddenLayer())
+	}
+	if len(empty_rbm.w) != len(rbm.w) {
+		t.Errorf("len(w) not equal")
+	}
+	for i, _ := range rbm.w {
+		if len(empty_rbm.w[i]) != len(rbm.w[i]) {
+			t.Errorf("len(w[%d]) not equal.", i)
+		}
+		for v, _ := range rbm.w[i] {
+			if len(rbm.w[i][v]) != len(empty_rbm.w[i][v]) {
+				t.Errorf("len(w[%d][%d]) not equal.", i, v)
+			}
+		}
+	}
+	if len(empty_rbm.b) != len(rbm.b) {
+		t.Errorf("len(rbm.b) not equal.")
+	}
+	for i, _ := range rbm.b {
+		if len(empty_rbm.b[i]) != len(rbm.b[i]) {
+			t.Errorf("len(b[%d]) not equal, expected %d, but got %d.", i,
+				len(rbm.b[i]), len(empty_rbm.b[i]))
+		}
+	}
+	if len(empty_rbm.c) != len(rbm.c) {
+		t.Errorf("len(rbm.c) not equal.")
+	}
+	if len(empty_rbm.u) != len(rbm.u) {
+		t.Errorf("len(rbm.u) not equal.")
+	}
 }

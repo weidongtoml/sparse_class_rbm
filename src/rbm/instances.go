@@ -37,7 +37,7 @@ func (instance *DataInstance) Equal(a *DataInstance) bool {
 
 type DataInstanceAccessor interface {
 	Reset()
-	NextInstance() DataInstance
+	NextInstance() (DataInstance, error)
 	Close()
 }
 
