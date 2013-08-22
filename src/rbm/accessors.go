@@ -59,6 +59,10 @@ func (rbm *SparseClassRBM) SetU(h_index int, v WeightT) {
 	(*rbm).u[h_index] = v
 }
 
+func (rbm *SparseClassRBM) UVector() []WeightT {
+	return (*rbm).u
+}
+
 // Method D returns the the bias of Y
 func (rbm *SparseClassRBM) D() WeightT {
 	return (*rbm).d

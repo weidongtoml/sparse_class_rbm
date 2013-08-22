@@ -35,3 +35,9 @@ func DotProduct(a, b []WeightT) WeightT {
 	}
 	return p
 }
+
+func ScalarProduct(a []WeightT, b WeightT) {
+	for i, _ := range a {
+		a[i] *= b
+	}
+}

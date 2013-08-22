@@ -22,7 +22,7 @@ func (rbm *SparseClassRBM) sampleHGivenXY(h []WeightT, x []int, y int) {
 
 // Method sampleXGivenH sample X according to the p.d. P(X|h).
 func (rbm *SparseClassRBM) sampleXGivenH(x []int, h []WeightT) {
-	for c := 0; c < rbm.x_class_num; c++ {
+	for c := 0; c < rbm.NumOfVisibleClasses(); c++ {
 		p_dist := rbm.probOfXInClassCGivenH(c, h)
 		x[c] = SampleKFromDistribution(p_dist)
 	}
@@ -30,7 +30,7 @@ func (rbm *SparseClassRBM) sampleXGivenH(x []int, h []WeightT) {
 
 // Method sampleYGivenH samples Y according to the p.d. P(Y|H)
 func (rbm *SparseClassRBM) sampleYGivenH(y *int, h []WeightT) {
-	if RandomWeight() < Sigmoid(rbm.d+DotProduct(rbm.u, h)) {
+	if RandomWeight() < Sigmoid(rbm.D()+DotProduct(rbm.UVector(), h)) {
 		*y = 1
 	} else {
 		*y = 0

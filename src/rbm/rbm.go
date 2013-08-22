@@ -18,8 +18,6 @@
 package rbm
 
 import (
-	_ "fmt"
-	_ "math"
 	"math/rand"
 	"time"
 )
@@ -36,18 +34,6 @@ type SparseClassRBM struct {
 	x_class_num   int           //number of Classes in X
 	x_class_sizes []int         //Size of each classes
 	h_num         int           //number of hidden units
-}
-
-// DataInstance is used for storing data sample for training and prediction.
-// In the case of prediction, the value of y is ignored.
-type DataInstance struct {
-	x []int //values of each classes, in the order of Class0, Class1, ...
-	y int   //values of Y
-}
-
-type DataInstanceAccessor interface {
-	Reset()
-	NextInstance() DataInstance
 }
 
 type trainParameters struct {

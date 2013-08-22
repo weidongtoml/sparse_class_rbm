@@ -15,7 +15,7 @@ func (rbm *SparseClassRBM) probDistOfHGivenXY(h []WeightT, x []int, y int) {
 // Method probOfHGivenXY calculates the probability of P(h_j = 1 | X, Y) using
 // 	P(h_j = 1 | X, Y) = sigmoid(sum{0<=c<=C}(W[c][j][X_c]) + c[j] + U_j . Y)
 func (rbm *SparseClassRBM) probOfHGivenXY(j int, x []int, y int) WeightT {
-	s := rbm.c[j] + WeightT(y)*rbm.u[j] + rbm.wHDotX(j, x)
+	s := rbm.C(j) + WeightT(y)*rbm.U(j) + rbm.wHDotX(j, x)
 	return Sigmoid(s)
 }
 
@@ -25,15 +25,15 @@ func (rbm *SparseClassRBM) probOfHGivenXY(j int, x []int, y int) WeightT {
 func (rbm *SparseClassRBM) probOfXInClassCGivenH(c int, h []WeightT) []WeightT {
 	p := make([]WeightT, rbm.x_class_sizes[c])
 	var denominator WeightT
-	for k := 0; k < rbm.x_class_sizes[c]; k++ {
+	for k := 0; k < rbm.ClassSize(c); k++ {
 		s := WeightT(0.0)
 		for j := 0; j < rbm.h_num; j++ {
-			s += rbm.w[c][j][k] * h[j]
+			s += rbm.W(j, c, k) * h[j]
 		}
 		p[k] = Exp(s)
 		denominator += p[k]
 	}
-	for k := 0; k < rbm.x_class_sizes[c]; k++ {
+	for k := 0; k < rbm.ClassSize(c); k++ {
 		p[k] /= denominator
 	}
 	return p
@@ -46,19 +46,19 @@ func (rbm *SparseClassRBM) probOfXInClassCGivenH(c int, h []WeightT) []WeightT {
 func (rbm *SparseClassRBM) probOfYGivenX(x []int) WeightT {
 	neg := WeightT(0)
 	pos := WeightT(0)
-	for j := 0; j < rbm.h_num; j++ {
-		w_dot_x_add_c := rbm.wHDotX(j, x) + rbm.c[j]
+	for j := 0; j < rbm.SizeOfHiddenLayer(); j++ {
+		w_dot_x_add_c := rbm.wHDotX(j, x) + rbm.C(j)
 		neg += SoftPlus(w_dot_x_add_c)
-		pos += SoftPlus(w_dot_x_add_c + rbm.u[j])
+		pos += SoftPlus(w_dot_x_add_c + rbm.U(j))
 	}
-	return Exp(rbm.d+pos) / (Exp(rbm.d+pos) + Exp(neg))
+	return Exp(rbm.D()+pos) / (Exp(rbm.D()+pos) + Exp(neg))
 }
 
 // Method wClassCDotX calculates the dot product of W[j] . X
 func (rbm *SparseClassRBM) wHDotX(j int, x []int) WeightT {
 	p := WeightT(0)
 	for c := 0; c < rbm.x_class_num; c++ {
-		p += rbm.w[c][j][x[c]]
+		p += rbm.W(j, c, x[c])
 	}
 	return p
 }

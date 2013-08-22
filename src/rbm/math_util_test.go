@@ -71,3 +71,35 @@ func Test_DotProduct(t *testing.T) {
 		}
 	}
 }
+
+func Test_ScalarProduct(t *testing.T) {
+	test_cases := []struct {
+		v     []WeightT
+		s     WeightT
+		exp_v []WeightT
+	}{
+		{
+			[]WeightT{0, 1, 2, 3, 4, 5},
+			0,
+			[]WeightT{0, 0, 0, 0, 0, 0},
+		}, {
+			[]WeightT{0, 1, 2, 3, 4, 5},
+			1,
+			[]WeightT{0, 1, 2, 3, 4, 5},
+		}, {
+			[]WeightT{0, 1, 2, 3, 4, 5},
+			2,
+			[]WeightT{0, 2, 4, 6, 8, 10},
+		}, {
+			[]WeightT{0, 1, 2, 3, 4, 5},
+			-2,
+			[]WeightT{0, -2, -4, -6, -8, -10},
+		},
+	}
+	for i, t_case := range test_cases {
+		ScalarProduct(t_case.v, t_case.s)
+		if !ArraysEqualWithinPrecision(t_case.v, t_case.exp_v, kPrecision) {
+			t.Errorf("TestCase: %d: error.", i)
+		}
+	}
+}
