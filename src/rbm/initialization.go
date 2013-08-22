@@ -9,6 +9,8 @@ import (
 	"math/rand"
 )
 
+// CloneEmpty returns an RBM having the same dimensions as the original but all
+// the weights and biases are 0.
 func (rbm *SparseClassRBM) CloneEmpty() *SparseClassRBM {
 	var empty_rbm SparseClassRBM
 	empty_rbm.x_class_num = rbm.x_class_num

@@ -39,6 +39,8 @@ func Test_Training(t *testing.T) {
 	y_bias := WeightT(0.3)
 	hidden_layer_size := 4
 
+	//TODO(weidoliang): automatically generates Xs from a couple of mathematical
+	// functions and generates Y based on conjunctive-disjunction of the values of Xs.
 	train_data := []DataInstance{
 		{
 			[]int{0, 1, 1, 1},

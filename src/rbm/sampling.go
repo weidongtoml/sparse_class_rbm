@@ -42,6 +42,8 @@ func SampleKFromDistribution(p_dist []WeightT) int {
 	return SelectKFromDist(RandomWeight(), p_dist)
 }
 
+// Selects one out of len(p_dist) based on the probability distribution of
+// p_dist and the random value p.
 func SelectKFromDist(p WeightT, p_dist []WeightT) int {
 	k := 0
 	acc_prob := p_dist[0]
@@ -55,6 +57,7 @@ func SelectKFromDist(p WeightT, p_dist []WeightT) int {
 	return k
 }
 
+// RandomWeight returns a random WeightT.
 func RandomWeight() WeightT {
 	return WeightT(rand.Float64())
 }

@@ -22,6 +22,7 @@ type DataInstance struct {
 	neg_y int   //number of negative instances
 }
 
+// Equal determines whether the given two DataInstance are equal.
 func (instance *DataInstance) Equal(a *DataInstance) bool {
 	if !(instance.pos_y == a.pos_y && instance.neg_y == a.neg_y &&
 		len(instance.x) == len(a.x)) {
@@ -35,6 +36,8 @@ func (instance *DataInstance) Equal(a *DataInstance) bool {
 	return true
 }
 
+// DataInstanceAccessor specifies an interface for retrieving training
+// and testing data.
 type DataInstanceAccessor interface {
 	Reset()
 	NextInstance() (DataInstance, error)
@@ -50,6 +53,8 @@ type SequentialDataLoader struct {
 	num_classes int
 }
 
+// NewInstanceLoader creates an InstnaceLoader from the given file, with each
+// instance having num_feature_class number of features.
 func NewInstanceLoader(filename string, num_feature_class int) *SequentialDataLoader {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -59,17 +64,22 @@ func NewInstanceLoader(filename string, num_feature_class int) *SequentialDataLo
 	return &SequentialDataLoader{filename, file, bufio.NewReader(file), num_feature_class}
 }
 
+// Reset resets the underlying file cursor.
 func (loader *SequentialDataLoader) Reset() {
 	if _, err := loader.file.Seek(0, 0); err != nil {
 		log.Printf("Failed to reset file %s: %s.", loader.filename, err)
 	}
 }
 
+// Close closes the underlying file.
 func (loader *SequentialDataLoader) Close() {
 	loader.reader = nil
 	loader.file.Close()
 }
 
+// NextInstance retrieves the next data instance, return EOF when end of file
+// has been reached, error if other errors have been encountered, or nil and
+// a valid DataInstance when everything is fine.
 func (loader *SequentialDataLoader) NextInstance() (DataInstance, error) {
 	var instance DataInstance
 	line, err := loader.reader.ReadString('\n')

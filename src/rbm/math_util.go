@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Collection of mathematical functions.
+
 package rbm
 
 import (
@@ -25,6 +27,7 @@ func Exp(x WeightT) WeightT {
 	return WeightT(math.Exp(float64(x)))
 }
 
+// Function DotProduct calcuates the dot product of the given 2 arrays.
 func DotProduct(a, b []WeightT) WeightT {
 	if len(a) != len(b) {
 		panic(fmt.Sprintf("Vector dimensions not the same: %d %d", len(a), len(b)))
@@ -36,6 +39,7 @@ func DotProduct(a, b []WeightT) WeightT {
 	return p
 }
 
+// ScalarProduct calculates the scalar product of a multiply by b.
 func ScalarProduct(a []WeightT, b WeightT) {
 	for i, _ := range a {
 		a[i] *= b

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Collection of probability functions of the RBM.
+
 package rbm
 
 // Method probDistOfHGivenXY calculates the probability distribution of
