@@ -9,7 +9,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"math/rand"
 	"os"
@@ -34,9 +33,11 @@ func (m *SimpleModel) GenerateInstance() ([]string, string) {
 		w += m.feature_weights[i][k]
 	}
 	w += rand.NormFloat64() * m.noise_std
-	y := "0"
+	y := ""
 	if Logit(w) < m.threshold {
-		y = "1"
+		y = "1\t0"
+	} else {
+		y = "0\t1"
 	}
 	return x, y
 }
@@ -88,10 +89,10 @@ func GenTrainData() {
 			},
 		},
 		0.8,
-		0.01,
+		0.0,
 	}
 
-	instance_cnt := []int{5000, 1000, 2000}
+	instance_cnt := []int{100000, 20000, 40000}
 	prefix := "./data"
 
 	for i, c := range instance_cnt {
@@ -111,9 +112,8 @@ func GenTrainData() {
 func TrainRBM() {
 	train_file := "./data_0.dat"
 	validation_file := "./data_1.dat"
-
-	var rbm_m rbm.SparseClassRBM
-	(&rbm_m).Initialize(class_sizes, class_biases, hidden_layer_size, y_bias)
+	class_sizes := []int{4, 2, 5, 1}
+	hidden_layer_size := 2
 
 	train_data_accessor := rbm.NewInstanceLoader(train_file, len(class_sizes))
 	defer train_data_accessor.Close()
@@ -121,14 +121,13 @@ func TrainRBM() {
 	validation_data_accessor := rbm.NewInstanceLoader(validation_file, len(class_sizes))
 	defer validation_data_accessor.Close()
 
-	class_sizes := []int{4, 2, 5, 1}
-	hidden_layer_size := 4
-
 	class_biases, y_bias := rbm.GetBiases(class_sizes, train_data_accessor)
+	var rbm_m rbm.SparseClassRBM
+	(&rbm_m).Initialize(class_sizes, class_biases, hidden_layer_size, y_bias)
 
 	var trainer rbm.RBMTrainer
 	trainer.Initialize(&rbm_m, train_data_accessor, validation_data_accessor,
-		0.01, 0.2, 0.9, 0.3, 1)
+		0.005, 0.0, 0, 0.0, 1)
 
 	trainer.Train()
 
@@ -137,7 +136,7 @@ func TrainRBM() {
 }
 
 func main() {
-	gen_data := false
+	gen_data := true
 	if gen_data {
 		GenTrainData()
 	}

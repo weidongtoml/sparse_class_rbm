@@ -84,7 +84,7 @@ func ROC(classifier BinaryClassifier, data_accessor DataInstanceAccessor) Coordi
 		}
 		p := classifier.GetPrediction(&instance)
 
-		if r, ok := eval_result[p]; ok {
+		if r, ok := eval_result[p]; !ok {
 			r = new(Coordinate)
 			(*r).n_pos = instance.pos_y
 			(*r).n_neg = instance.neg_y
