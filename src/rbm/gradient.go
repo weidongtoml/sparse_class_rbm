@@ -58,6 +58,7 @@ func (rbm *SparseClassRBM) NewDeltaT() *deltaT {
 	return &delta
 }
 
+// doGradient Calculates the gradient using one training instance.
 func (trainer *RBMTrainer) doGradient(pos_delta, neg_delta *deltaT) (bool, bool) {
 	has_pos, has_neg := false, false
 	var data_instance DataInstance

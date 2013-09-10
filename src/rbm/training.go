@@ -4,6 +4,14 @@
 
 package rbm
 
+import (
+	"fmt"
+)
+
+const (
+	KMinDeltaAUC = 0.001 //minimum AUC change to justify another round of training
+)
+
 // Initialize a trainer.
 func (trainer *RBMTrainer) Initialize(rbm *SparseClassRBM,
 	train_data_accessor DataInstanceAccessor,
@@ -23,9 +31,12 @@ func (trainer *RBMTrainer) Initialize(rbm *SparseClassRBM,
 	trainer.validation_data_accessor = validation_data_accessor
 }
 
+// Train an RBM.
 func (trainer *RBMTrainer) Train() {
 	pos_delta := trainer.rbm.NewDeltaT()
 	neg_delta := trainer.rbm.NewDeltaT()
+	prev_auc := float64(0)
+	epoch := 0
 	for {
 		has_pos, has_neg := trainer.doGradient(pos_delta, neg_delta)
 		if has_pos {
@@ -35,11 +46,26 @@ func (trainer *RBMTrainer) Train() {
 			trainer.updateModel(neg_delta)
 		}
 		if !has_pos && !has_neg {
-			//TODO(weidoliang): evaluate model result and only when obtain the best
-			//resilt do we stop training.
-			break
+			auc := ROCAuc(trainer.rbm, trainer.validation_data_accessor)
+
+			//TODO(weidoliang): output various model statistics.
+			fmt.Printf("Epoch: %d\n", epoch)
+			fmt.Printf("AUC: %f\n", auc)
+			trainer.ModelStats()
+			if auc-prev_auc < KMinDeltaAUC {
+				break
+			} else {
+				trainer.training_data_accessor.Reset()
+			}
+			epoch++
 		}
 	}
+}
+
+func (trainer *RBMTrainer) ModelStats() {
+	w_sparsity := trainer.rbm.SparsityOfW()
+	u_sparsity := trainer.rbm.SparsityOfU()
+	fmt.Printf("Sparsity: \nW: %f\nU: %f\n", w_sparsity, u_sparsity)
 }
 
 func (rbm *SparseClassRBM) IsValidInput(instance DataInstance) bool {

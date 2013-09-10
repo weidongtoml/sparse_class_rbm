@@ -39,10 +39,35 @@ func (c Coordinates) Less(i, j int) bool {
 }
 
 // ROCAuc calcuates the area under the receiver operating curve.
-func ROCAuc(classifier BinaryClassifier, data_accessor *DataInstanceAccessor) float64 {
+func ROCAuc(classifier BinaryClassifier, data_accessor DataInstanceAccessor) float64 {
 	coordinates := ROC(classifier, data_accessor)
+	return AUC(coordinates)
+}
 
-	return 0
+// Calculates the area under the auc curve given the coordinates.
+func AUC(coordinates Coordinates) float64 {
+	total_positives := 0
+	total_negatives := 0
+	for _, c := range coordinates {
+		total_positives += c.n_pos
+		total_negatives += c.n_neg
+	}
+
+	cur_tp := total_positives
+	cur_fp := total_negatives
+	area := float64(0)
+	for _, c := range coordinates {
+		new_tp := cur_tp - c.n_pos
+		new_fp := cur_fp - c.n_neg
+
+		h := float64(cur_tp+new_tp) / 2
+		w := float64(cur_fp - new_fp)
+		area += w * h
+
+		cur_tp = new_tp
+		cur_fp = new_fp
+	}
+	return area / float64(total_positives*total_negatives)
 }
 
 // ROC returns the coordinate of the Receiver Operating Curve based based on the
@@ -104,6 +129,27 @@ func LogLikelihood(classifier BinaryClassifier, data_accessor DataInstanceAccess
 // L2NormOfParamaeters returns the L2 norm of all the parameters of the given RBM.
 func (rbm *SparseClassRBM) L2NormOfParamaeters() float64 {
 	return 0
+}
+
+func L2Norm(w interface{}) float64 {
+	l2norm := float64(0)
+	w_t := reflect.TypeOf(w)
+	w_v := reflect.ValueOf(w)
+
+	switch w_t.Kind() {
+	case reflect.Array, reflect.Slice:
+		for i := 0; i < w_v.Len(); i++ {
+			l2norm += L2Norm(w_v.Index(i).Interface())
+		}
+		break
+	case reflect.Float64:
+		l2norm += w_v.Float()
+		break
+	default:
+		panic(fmt.Sprintf("Invalid parameter w: %v.", w))
+		break
+	}
+	return l2norm
 }
 
 func Sparsity(w interface{}, z interface{}) (zeros int, count int) {

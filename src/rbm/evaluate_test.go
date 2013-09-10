@@ -9,6 +9,29 @@ import (
 	"testing"
 )
 
+func Test_AUC(t *testing.T) {
+	test_case := []*Coordinate{
+		{
+			1, 5, 0.1,
+		}, {
+			2, 6, 0.3,
+		}, {
+			3, 2, 0.33,
+		}, {
+			5, 1, 0.50,
+		}, {
+			7, 0, 0.90,
+		},
+	}
+	expected_area := float64(0.873016)
+
+	//coordinates := Coordinates{test_case}
+	actual_area := AUC(test_case)
+	if !EqualWithinPrecesionF64(actual_area, expected_area, kPrecision) {
+		t.Errorf("Expected area to be %f but got %f.", expected_area, actual_area)
+	}
+}
+
 func Test_Sparsity(t *testing.T) {
 	test_cases := []struct {
 		w           interface{}
@@ -59,5 +82,4 @@ func Test_Sparsity(t *testing.T) {
 				i, t_case.z_count, t_case.total_count, z_count, total_count)
 		}
 	}
-
 }

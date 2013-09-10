@@ -128,3 +128,37 @@ func (loader *SequentialDataLoader) NextInstance() (DataInstance, error) {
 	instance.x = feature_sets
 	return instance, nil
 }
+
+func GetBiases(class_sizes []int, accessor DataInstanceAccessor) ([][]WeightT, WeightT) {
+	biases := make([][]WeightT, len(class_sizes))
+	for i, s := range class_sizes {
+		biases[i] = make([]WeightT, s)
+	}
+
+	pos_y := 0
+	neg_y := 0
+	for {
+		inst, err := accessor.NextInstance()
+		if err == io.EOF {
+			break
+		} else if err == nil {
+			for i, v := range inst.x {
+				biases[i][v]++
+			}
+			pos_y += inst.pos_y
+			neg_y += inst.neg_y
+		}
+	}
+
+	for i := range biases {
+		s := WeightT(0)
+		for _, v := range biases[i] {
+			s += v
+		}
+		for j, _ := range biases[i] {
+			biases[i][j] /= s
+		}
+	}
+
+	return biases, WeightT(pos_y) / WeightT(pos_y+neg_y)
+}

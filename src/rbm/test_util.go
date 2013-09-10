@@ -11,6 +11,10 @@ import (
 
 const kPrecision = 0.000001
 
+func EqualWithinPrecesionF64(a, b, p float64) bool {
+	return math.Abs(a-b) <= p
+}
+
 func EqualWithinPrecision(a, b WeightT, p float64) bool {
 	return math.Abs(float64(a-b)) <= p
 }
