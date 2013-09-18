@@ -22,6 +22,10 @@ type DataInstance struct {
 	neg_y int   //number of negative instances
 }
 
+func (instance *DataInstance) GetX() []int {
+	return instance.x
+}
+
 // Equal determines whether the given two DataInstance are equal.
 func (instance *DataInstance) Equal(a *DataInstance) bool {
 	if !(instance.pos_y == a.pos_y && instance.neg_y == a.neg_y &&

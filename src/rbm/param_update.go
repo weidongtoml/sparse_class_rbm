@@ -38,7 +38,8 @@ func (trainer *RBMTrainer) updateModel(delta *deltaT) {
 		prev_delta_theta := prev_delta.C(j)
 
 		cur_theta := rbm.C(j)
-		delta_theta := eta*delta_v - lambda*cur_theta + mu*prev_delta_theta
+		//delta_theta := eta*delta_v - lambda*cur_theta + mu*prev_delta_theta
+		delta_theta := eta*delta_v + mu*prev_delta_theta
 		rbm.SetC(j, cur_theta+delta_theta)
 
 		prev_delta.SetC(j, delta_theta)
@@ -60,7 +61,8 @@ func (trainer *RBMTrainer) updateModel(delta *deltaT) {
 		prev_delta_theta := prev_delta.D()
 
 		cur_theta := rbm.D()
-		delta_theta := eta*delta.delta_d - lambda*cur_theta + mu*prev_delta_theta
+		//delta_theta := eta*delta.delta_d - lambda*cur_theta + mu*prev_delta_theta
+		delta_theta := eta*delta.delta_d + mu*prev_delta_theta
 		rbm.SetD(cur_theta + delta_theta)
 
 		prev_delta.SetD(delta_theta)

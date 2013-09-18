@@ -106,12 +106,24 @@ func ROC(classifier BinaryClassifier, data_accessor DataInstanceAccessor) Coordi
 }
 
 // RMSE returns the root mean squared error.
-func RMSE(classifier BinaryClassifier, data_accessor *DataInstanceAccessor) float64 {
-
-	return 0
+func RMSE(classifier BinaryClassifier, data_accessor DataInstanceAccessor) float64 {
+	square_error := 0
+	cnt := 0
+	decision_boundary := WeightT(0.5)
+	ForEachValidDataInstance(data_accessor, func(instance DataInstance) {
+		cnt += instance.pos_y + instance.neg_y
+		p := classifier.GetPrediction(&instance)
+		if p > decision_boundary {
+			square_error += instance.neg_y
+		} else {
+			square_error += instance.pos_y
+		}
+	})
+	return math.Sqrt(float64(square_error) / float64(cnt))
 }
 
 // LogLikelihood returns the log likelihood of the classifier fitting the given data.
+// TODO(weidoliang): make decision boundary as a parameter
 func LogLikelihood(classifier BinaryClassifier, data_accessor DataInstanceAccessor) float64 {
 	loglikelihood := float64(0)
 	ForEachValidDataInstance(data_accessor, func(instance DataInstance) {

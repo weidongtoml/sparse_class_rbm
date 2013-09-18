@@ -18,33 +18,60 @@ import (
 )
 
 type SimpleModel struct {
-	feature_distribution [][]float64
-	feature_weights      [][]float64
-	threshold            float64
-	noise_std            float64
+	feature_distribution [][]rbm.WeightT
+	feature_weights      [][]rbm.WeightT
+	threshold            rbm.WeightT
+	noise_std            rbm.WeightT
 }
 
-func (m *SimpleModel) GenerateInstance() ([]string, string) {
-	var x []string
-	w := float64(0)
+// GenerateInstance generates a data sample form the given model.
+func (m *SimpleModel) GenerateInstance() ([]int, int) {
+	x := make([]int, len(m.feature_distribution))
 	for i, v := range m.feature_distribution {
-		k := SelectKFromDist(rand.Float64(), v)
-		x = append(x, fmt.Sprintf("%d:%d", i, k))
+		k := SelectKFromDist(rbm.WeightT(rand.Float64()), v)
+		x[i] = k
+	}
+	y := 0
+	if m.Predict(x, m.noise_std) > m.threshold {
+		y = 1
+	}
+
+	return x, y
+}
+
+// InstanceToString converts the given instance to string.
+func InstanceToString(x []int, y int) string {
+	label := ""
+	if y == 1 {
+		label = "1\t0"
+	} else {
+		label = "0\t1"
+	}
+
+	var instance []string
+	for i, v := range x {
+		instance = append(instance, fmt.Sprintf("%d:%d", i, v))
+	}
+	return label + "\t" + strings.Join(instance, "\t")
+}
+
+// Predict makes a prediction with the given input.
+func (m *SimpleModel) Predict(x []int, noise rbm.WeightT) rbm.WeightT {
+	w := rbm.WeightT(0)
+	for i, k := range x {
 		w += m.feature_weights[i][k]
 	}
-	w += rand.NormFloat64() * m.noise_std
-	y := ""
-	if Logit(w) < m.threshold {
-		y = "1\t0"
-	} else {
-		y = "0\t1"
-	}
-	return x, y
+	w += noise
+	return Sigmoid(w)
+}
+
+func (m SimpleModel) GetPrediction(instance *rbm.DataInstance) rbm.WeightT {
+	return m.Predict(instance.GetX(), 0)
 }
 
 // Selects one out of len(p_dist) based on the probability distribution of
 // p_dist and the random value p.
-func SelectKFromDist(p float64, p_dist []float64) int {
+func SelectKFromDist(p rbm.WeightT, p_dist []rbm.WeightT) int {
 	k := 0
 	acc_prob := p_dist[0]
 	for ; k < len(p_dist)-1; k++ {
@@ -57,16 +84,16 @@ func SelectKFromDist(p float64, p_dist []float64) int {
 	return k
 }
 
-func Logit(x float64) float64 {
-	x_exp := math.Exp(x)
-	return x_exp / (1 + x_exp)
+func Sigmoid(x rbm.WeightT) rbm.WeightT {
+	x_exp := math.Exp(float64(x))
+	return rbm.WeightT(x_exp / (1 + x_exp))
 }
 
 func GenTrainData() {
 	rand.Seed(time.Now().Unix())
 
 	model := SimpleModel{
-		[][]float64{
+		[][]rbm.WeightT{
 			{
 				0.1, 0.2, 0.3, 0.4,
 			}, {
@@ -77,7 +104,7 @@ func GenTrainData() {
 				1.0,
 			},
 		},
-		[][]float64{
+		[][]rbm.WeightT{
 			{
 				0.2, -0.3, 1.2, 3.5,
 			}, {
@@ -104,9 +131,20 @@ func GenTrainData() {
 		defer out_fd.Close()
 		for j := 0; j < c; j++ {
 			x, y := model.GenerateInstance()
-			out_fd.WriteString(fmt.Sprintf("%s\t%s\n", y, strings.Join(x, "\t")))
+			out_fd.WriteString(InstanceToString(x, y) + "\n")
 		}
 	}
+
+	validation_file := "./data_1.dat"
+	validation_data_accessor := rbm.NewInstanceLoader(validation_file, len(model.feature_distribution))
+	defer validation_data_accessor.Close()
+
+	validation_auc := rbm.ROCAuc(model, validation_data_accessor)
+	log_likelihood := rbm.LogLikelihood(model, validation_data_accessor)
+	rmse := rbm.RMSE(model, validation_data_accessor)
+	fmt.Printf("Max Validation AUC: %f\n", validation_auc)
+	fmt.Printf("Max Validation LogLikelihood: %f\n", log_likelihood)
+	fmt.Printf("max RMSE: %f\n", rmse)
 }
 
 func TrainRBM() {
@@ -126,8 +164,15 @@ func TrainRBM() {
 	(&rbm_m).Initialize(class_sizes, class_biases, hidden_layer_size, y_bias)
 
 	var trainer rbm.RBMTrainer
+
+	learning_rate := rbm.WeightT(0.001)
+	regularization := rbm.WeightT(0.0)
+	momentum := rbm.WeightT(0.0)
+	gen_learning_imp := rbm.WeightT(0.0)
+	gibs_chain_len := 1
+
 	trainer.Initialize(&rbm_m, train_data_accessor, validation_data_accessor,
-		0.005, 0.0, 0, 0.0, 1)
+		learning_rate, regularization, momentum, gen_learning_imp, gibs_chain_len)
 
 	trainer.Train()
 

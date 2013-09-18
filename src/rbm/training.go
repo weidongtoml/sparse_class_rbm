@@ -37,6 +37,7 @@ func (trainer *RBMTrainer) Train() {
 	neg_delta := trainer.rbm.NewDeltaT()
 	prev_auc := float64(0)
 	epoch := 0
+	use_validation_auc_stop := false
 	for {
 		has_pos, has_neg := trainer.doGradient(pos_delta, neg_delta)
 		if has_pos {
@@ -47,17 +48,19 @@ func (trainer *RBMTrainer) Train() {
 		}
 		if !has_pos && !has_neg {
 			auc := ROCAuc(trainer.rbm, trainer.validation_data_accessor)
-
+			log_likelihood := LogLikelihood(trainer.rbm, trainer.training_data_accessor)
 			//TODO(weidoliang): output various model statistics.
 			fmt.Printf("Epoch: %d\n", epoch)
-			fmt.Printf("AUC: %f\n", auc)
+			fmt.Printf("Training LogLikelihood: %f\n", log_likelihood)
+			fmt.Printf("Validation AUC: %f\n", auc)
 			trainer.ModelStats()
-			if auc-prev_auc < KMinDeltaAUC {
+			if use_validation_auc_stop && auc-prev_auc < KMinDeltaAUC {
 				break
 			} else {
 				trainer.training_data_accessor.Reset()
 			}
 			epoch++
+			prev_auc = auc
 		}
 	}
 }
